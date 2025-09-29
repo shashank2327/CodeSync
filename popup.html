@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode to GitHub</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Main view: Shown when confiqured-->
+         <div id="main-view" class="hidden">
+            <h1 class="header">Add LeetCode Problem</h1>
+            <div id="problem-info">
+                <p>Loading problem details</p>
+            </div>
+            <div id="not-leetcode=page" class="hidden">
+                <p class="error">This is not a LeetCode problem page.</p>
+            </div>
+            <form id="problem-form" class="hidden">
+                <div class="form-group">
+                    <label for="problem-title">Problem Title</label>
+                    <input type="text" id="problem-title" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="problem-url">Problem URL</label>
+                    <input type="text" id="problem-url" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="problem-status">Status:</label>
+                    <select id="problem-status">
+                        <option value="Solved">Solved</option>
+                        <option value="Attempted">Attempted</option>
+                        <option value="To-Do">To-Do</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="problem-tags">Tag (comma-seperated):</label>
+                    <input type="text" id="problem-tags" placeholder="e.g., array, hash-table">
+                </div>
+                <button type="submit" id="add-button" class="button">Add to GitHub</button>
+            </form>
+            <div id="status-message"></div>
+         </div>
+
+         <!-- Settings View: Shown for first-time use-->
+         <div id="settings-view">
+            <h1 class="header">Setup Required</h1>
+            <p>Please Provide your GitHub details to save problems.</p>
+            <form id="setting-form">
+                <div class="form-group">
+                    <label for="github-token">GitHub Personal Access Token</label>
+                    <input type="password" id="github-token" required>
+                </div>
+                <div class="form-group">
+                    <label for="github-owner">GitHub Username (Owner):</label>
+                    <input type="text" id="github-owner" placeholder="e.g. your_username" required>
+                </div>
+                <div class="form-group">
+                    <label for="github-repo">Repository Name:</label>
+                    <input type="text" id="github-repo" placeholder="e.g. my-leetcode-solution" required>
+                </div>
+                <button type="submit" class="button">Save Settings</button>
+            </form>
+         </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
