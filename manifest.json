@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Tracker",
+  "name": "CodeSync",
   "version": "1.0",
   "description": "Adds CP problems from platform to github directly.",
   "permissions": ["activeTab", "scripting", "storage"],
