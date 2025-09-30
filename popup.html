@@ -3,28 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codeforces to GitHub</title>
+    <title>CP Problem Tracker</title>
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <div class="container">
-        <!-- Main View: Shown when configured -->
+        <!-- Main View: Shown when settings are configured -->
         <div id="main-view" class="hidden">
-            <h1 class="header">Add DSA Problem to GitHub</h1>
-            <div id="problem-info" class="loading-status">
-                <p>Loading problem details...</p>
+            <h1>Add CP Problem to GitHub</h1>
+            <div id="problem-info" class="loading-state">
+                <p>Fetching problem details...</p>
             </div>
+            <!-- Form to add problem -->
             <form id="problem-form" class="hidden">
                 <div class="form-group">
-                    <label for="problem-title">Problem Title:</label>
-                    <input type="text" id="problem-title" readonly>
+                    <label for="problem-title">Problem Title</label>
+                    <input type="text" id="problem-title" required>
                 </div>
                 <div class="form-group">
-                    <label for="problem-url">Problem URL:</label>
-                    <input type="text" id="problem-url" readonly>
+                    <label for="problem-url">Problem URL</label>
+                    <input type="text" id="problem-url" required>
                 </div>
                 <div class="form-group">
-                    <label for="problem-status">Status:</label>
+                    <label for="problem-status">Status</label>
                     <select id="problem-status">
                         <option value="Solved">Solved</option>
                         <option value="Attempted">Attempted</option>
@@ -32,37 +33,38 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="problem-tags">Tags (comma-separated):</label>
-                    <input type="text" id="problem-tags" placeholder="e.g., dp, graphs, two-pointers">
+                    <label for="problem-tags">Tags (comma-separated)</label>
+                    <input type="text" id="problem-tags" placeholder="e.g. dp, graphs, two-pointers">
                 </div>
-                <button type="submit" id="add-button" class="button">Add to GitHub</button>
+                <button type="submit" id="add-button" class="btn">Add to GitHub</button>
             </form>
+            <!-- Message for non-supported pages -->
             <div id="not-cp-page" class="hidden">
-                <p>You are not on a supported Leetcode or Codeforces problem page.</p>
+                <p>You are not on a supported LeetCode or Codeforces problem page.</p>
             </div>
         </div>
 
-        <!-- Settings View: Shown for first-time use -->
+        <!-- Settings View: Shown on first use or if settings are missing -->
         <div id="settings-view" class="hidden">
-            <h1 class="header">Setup Required</h1>
+            <h2>Settings</h2>
             <p>Please provide your GitHub details to save problems.</p>
             <form id="settings-form">
                 <div class="form-group">
-                    <label for="github-token">GitHub Personal Access Token:</label>
+                    <label for="github-token">GitHub Personal Access Token</label>
                     <input type="password" id="github-token" required>
                 </div>
                 <div class="form-group">
-                    <label for="github-owner">GitHub Username (Owner):</label>
-                    <input type="text" id="github-owner" placeholder="e.g., your-username" required>
+                    <label for="github-owner">GitHub Username (Owner)</label>
+                    <input type="text" id="github-owner" required>
                 </div>
-                <div class="form-group">
-                    <label for="github-repo">Repository Name:</label>
-                    <input type="text" id="github-repo" placeholder="e.g., my-cp-solutions" required>
+                 <div class="form-group">
+                    <label for="github-repo">Repository Name</label>
+                    <input type="text" id="github-repo" required>
                 </div>
-                <button type="submit" class="button">Save Settings</button>
+                <button type="submit" class="btn">Save Settings</button>
             </form>
         </div>
-        <div id="Status-message"></div>
+         <div id="status-message"></div>
     </div>
     <script src="popup.js"></script>
 </body>

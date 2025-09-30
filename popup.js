@@ -3,7 +3,7 @@ const mainView = document.getElementById('main-view');
 const settingsView = document.getElementById('settings-view');
 const problemInfo = document.getElementById('problem-info');
 const problemForm = document.getElementById('problem-form');
-const notCpPage = document.getElementById('not-cp-page');
+const notCpPage = document.getElementById('not-cp-page'); // Generic ID
 const settingsForm = document.getElementById('settings-form');
 const githubTokenInput = document.getElementById('github-token');
 const githubOwnerInput = document.getElementById('github-owner');
@@ -16,10 +16,11 @@ const problemUrlInput = document.getElementById('problem-url');
 const problemStatusInput = document.getElementById('problem-status');
 const problemTagsInput = document.getElementById('problem-tags');
 
+// Globals for settings and site detection
 let githubToken = '';
 let repoOwner = '';
 let repoName = '';
-let detectedSite = '';
+let detectedSite = ''; // Will be 'LeetCode' or 'Codeforces'
 let contentScriptTimeout;
 
 // --- Main Logic ---
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showMainView();
         getCurrentTabInfo();
     } else {
+        // Pre-fill any saved settings
         if (result.githubToken) githubTokenInput.value = result.githubToken;
         if (result.repoOwner) githubOwnerInput.value = result.repoOwner;
         if (result.repoName) githubRepoInput.value = result.repoName;
@@ -95,7 +97,7 @@ problemForm.addEventListener('submit', async (e) => {
 
 async function getCurrentTabInfo() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
+    
     const url = tab.url;
     let isSupportedSite = false;
 
@@ -109,9 +111,9 @@ async function getCurrentTabInfo() {
 
     if (isSupportedSite) {
         problemUrlInput.value = url;
-
+        
         contentScriptTimeout = setTimeout(() => {
-            problemInfo.innerHTML = '<p class="error">Error: Could not retrieve problem title. The site structure may have changed.</p>';
+            problemInfo.innerHTML = `<p class="error">Error: Could not retrieve problem title. The site's structure may have changed.</p>`;
         }, 3000);
 
         await chrome.scripting.executeScript({
@@ -147,8 +149,7 @@ async function createGitHubFile(title, url, status, tags) {
     const commitMessage = `Add ${detectedSite} problem: ${title}`;
 
     console.log('Attempting to create file at:', apiUrl);
-
-
+    
     try {
         const response = await fetch(apiUrl, {
             method: 'PUT',
@@ -160,11 +161,10 @@ async function createGitHubFile(title, url, status, tags) {
             body: JSON.stringify({
                 message: commitMessage,
                 content: encodedContent
-            }) 
+            })
         });
 
-
-        if (response.status == 201) {
+        if (response.status === 201) {
             const data = await response.json();
             console.log(`---> The file was created at this URL: ${data.content.html_url} <---`);
             showStatusMessage(`Success! File '${sanitizedTitle}.md' created.`, 'success');
@@ -182,7 +182,6 @@ async function createGitHubFile(title, url, status, tags) {
     } catch (error) {
         showStatusMessage('Network Error. Check your internet connection.', 'error');
     }
-
 }
 
 function showStatusMessage(message, type) {
@@ -192,4 +191,3 @@ function showStatusMessage(message, type) {
         setTimeout(() => statusMessage.textContent = '', 4000);
     }
 }
-
