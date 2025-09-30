@@ -1,9 +1,9 @@
-    // DOM Elements
+// DOM Elements
 const mainView = document.getElementById('main-view');
 const settingsView = document.getElementById('settings-view');
 const problemInfo = document.getElementById('problem-info');
 const problemForm = document.getElementById('problem-form');
-const notCfPage = document.getElementById('not-cf-page'); // Renamed
+const notCpPage = document.getElementById('not-cp-page');
 const settingsForm = document.getElementById('settings-form');
 const githubTokenInput = document.getElementById('github-token');
 const githubOwnerInput = document.getElementById('github-owner');
@@ -19,6 +19,7 @@ const problemTagsInput = document.getElementById('problem-tags');
 let githubToken = '';
 let repoOwner = '';
 let repoName = '';
+let detectedSite = '';
 let contentScriptTimeout;
 
 // --- Main Logic ---
@@ -94,15 +95,23 @@ problemForm.addEventListener('submit', async (e) => {
 
 async function getCurrentTabInfo() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    // UPDATED: Check for Codeforces URL patterns
-    const isCodeforcesUrl = tab.url && (tab.url.includes('codeforces.com/problemset/problem') || tab.url.includes('codeforces.com/contest'));
 
-    if (isCodeforcesUrl) {
-        problemUrlInput.value = tab.url; // Use the full URL for Codeforces
-        
+    const url = tab.url;
+    let isSupportedSite = false;
+
+    if (url && url.startsWith('https://leetcode.com/problems/')) {
+        detectedSite = 'LeetCode';
+        isSupportedSite = true;
+    } else if (url && (url.includes('codeforces.com/problemset/problem') || url.includes('codeforces.com/contest'))) {
+        detectedSite = 'Codeforces';
+        isSupportedSite = true;
+    }
+
+    if (isSupportedSite) {
+        problemUrlInput.value = url;
+
         contentScriptTimeout = setTimeout(() => {
-            problemInfo.innerHTML = `<p class="error">Error: Could not retrieve problem title. Codeforces' site structure may have changed.</p>`;
+            problemInfo.innerHTML = '<p class="error">Error: Could not retrieve problem title. The site structure may have changed.</p>';
         }, 3000);
 
         await chrome.scripting.executeScript({
@@ -111,7 +120,7 @@ async function getCurrentTabInfo() {
         });
     } else {
         problemInfo.classList.add('hidden');
-        notCfPage.classList.remove('hidden');
+        notCpPage.classList.remove('hidden');
     }
 }
 
@@ -125,17 +134,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function createGitHubFile(title, url, status, tags) {
+    if (!detectedSite) {
+        showStatusMessage('Error: Could not determine the website.', 'error');
+        return;
+    }
+
     const sanitizedTitle = title.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '-').toLowerCase();
-    // UPDATED: Save in a Codeforces-specific folder
-    const filePath = `Codeforces-Problems/${sanitizedTitle}.md`;
+    const filePath = `${detectedSite}-Problems/${sanitizedTitle}.md`;
     const fileContent = `# ${title}\n\n**Problem URL:** [${title}](${url})\n\n**Status:** ${status}\n\n**Tags:** ${tags.join(', ')}\n`;
     const encodedContent = btoa(unescape(encodeURIComponent(fileContent)));
     const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
-    // UPDATED: Commit message
-    const commitMessage = `Add Codeforces problem: ${title}`;
+    const commitMessage = `Add ${detectedSite} problem: ${title}`;
 
     console.log('Attempting to create file at:', apiUrl);
-    
+
+
     try {
         const response = await fetch(apiUrl, {
             method: 'PUT',
@@ -147,10 +160,11 @@ async function createGitHubFile(title, url, status, tags) {
             body: JSON.stringify({
                 message: commitMessage,
                 content: encodedContent
-            })
+            }) 
         });
 
-        if (response.status === 201) {
+
+        if (response.status == 201) {
             const data = await response.json();
             console.log(`---> The file was created at this URL: ${data.content.html_url} <---`);
             showStatusMessage(`Success! File '${sanitizedTitle}.md' created.`, 'success');
@@ -168,6 +182,7 @@ async function createGitHubFile(title, url, status, tags) {
     } catch (error) {
         showStatusMessage('Network Error. Check your internet connection.', 'error');
     }
+
 }
 
 function showStatusMessage(message, type) {
