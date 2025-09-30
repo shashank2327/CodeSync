@@ -1,22 +1,34 @@
 (function() {
-    console.log("Codeforces Tracker: Content script injected. Searching for title...");
+    console.log("CP Tracker: Content script injected on Codeforces. Searching for title...");
 
-    const PRECISE_SELECTOR = TO_DO;
-
+    const hostname = window.location.hostname;
     let problemTitle = null;
+    let titleElement = null;
 
-    const titleElement = document.querySelector(PRECISE_SELECTOR);
+    if (hostname.includes('leetcode.com')) {
+        console.log("CP Tracker: LeetCode site detected.");
+        const LEETCODE_SELECTOR = 'div.flex.items-start.justify-between.gap-4 > div.flex.items-start.gap-2 > div > a';
+        titleElement = document.querySelector(LEETCODE_SELECTOR);
+        if (titleElement && titleElement.innerText) {
+            problemTitle = titleElement.innerText.replace(/^\d+\.\s*/, '');
+        }
+    } else if (hostname.includes('codeforces.com')) {
+        console.log("CP Tracker: Codeforces site detected.");
+        const CODEFORCES_SELECTOR = 'div.problem-statement .header .title';
+        titleElement = document.querySelector(CODEFORCES_SELECTOR);
+        if (titleElement && titleElement.innerText) {
+            problemTitle = titleElement.innerText.replace(/^[A-Z0-9]+\.\s*/, '');
+        }
+    }
 
-    if (titleElement && titleElement.innerText) {
-        problemTitle = titleElement.innerText.replace(/^\d+\.\s*/, '');
-        console.log(`LeetCode Tracker: SUCCESS! Found title with selector: "${problemTitle}"`);
-        
-        // Send the found title to the popup script
+    if (problemTitle) {
+        console.log(`CP Tracker: SUCCESS! Found title: "${problemTitle}"`);
         chrome.runtime.sendMessage({
             action: 'sendProblemTitle',
             title: problemTitle
         });
     } else {
-        console.error(`Codeforces Tracker: Failed. The selector did not find the title element. Codeforces may have updated their site again.`)
+        console.error(`CP Tracker: FAILED. Could not find title element on this page. The site's structure may have changed.`);
     }
 })();
+
